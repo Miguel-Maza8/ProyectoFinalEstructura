@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -18,17 +19,7 @@ import controllers.MapController;
 import models.MapPoint;
 import structures.graphs.PathResult;
 
-/**
- * Ventana principal de la aplicacion.
- *
- * Contiene los controles de interaccion (selectores de nodo inicio/destino,
- * algoritmo, modo de visualizacion y botones de edicion y ejecucion) y aloja
- * al MapPanel, que es el unico responsable de dibujar el mapa.
- *
- * Esta clase no implementa BFS ni DFS: solo pide al controlador que ejecute
- * la busqueda y le indica a MapPanel, paso a paso mediante un Timer, que
- * puntos debe ir resaltando segun el modo de visualizacion elegido.
- */
+
 public class MainFrame extends JFrame {
 
     private static final int PASO_ANIMACION_MS = 350;
@@ -38,18 +29,23 @@ public class MainFrame extends JFrame {
 
     private final JComboBox<String> comboInicio = new JComboBox<>();
     private final JComboBox<String> comboDestino = new JComboBox<>();
-    private final JComboBox<String> comboAlgoritmo = new JComboBox<>(new String[] { "BFS", "DFS" });
+    private final JComboBox<String> comboAlgoritmo = new JComboBox<>(
+            new String[] { "BFS", "DFS", "Voraz (Greedy)", "A*" });
     private final JComboBox<String> comboModo = new JComboBox<>(new String[] { "Exploracion", "Ruta final" });
 
     private final JButton botonAgregarNodo = new JButton("Agregar punto");
     private final JButton botonAgregarArista = new JButton("Agregar calle");
     private final JButton botonEliminarNodo = new JButton("Eliminar punto");
+    private final JButton botonEliminarArista = new JButton("Eliminar calle");
     private final JButton botonEjecutar = new JButton("Ejecutar");
     private final JButton botonLimpiar = new JButton("Limpiar recorrido");
 
     private final JLabel etiquetaEstado = new JLabel("Seleccione un modo de edicion o ejecute una busqueda.");
 
     private Timer animacionActiva;
+    private String ultimoAlgoritmoEjecutado;
+    private double ultimoTiempoEjecucionMs;
+
 
     public MainFrame(MapController controller) {
         super("Rutas en el mapa - BFS y DFS");
@@ -88,6 +84,7 @@ public class MainFrame extends JFrame {
         barra.add(botonAgregarNodo);
         barra.add(botonAgregarArista);
         barra.add(botonEliminarNodo);
+        barra.add(botonEliminarArista);
 
         add(barra, BorderLayout.NORTH);
         add(etiquetaEstado, BorderLayout.SOUTH);
@@ -101,6 +98,8 @@ public class MainFrame extends JFrame {
                 "Click en dos puntos para crear una calle entre ellos."));
         botonEliminarNodo.addActionListener(e -> activarModo(MapPanel.EditMode.REMOVE_NODE,
                 "Click en un punto para eliminarlo."));
+        botonEliminarArista.addActionListener(e -> activarModo(MapPanel.EditMode.REMOVE_EDGE,
+                "Click en dos puntos para eliminar la calle entre ellos."));
 
         botonEjecutar.addActionListener(e -> ejecutarBusqueda());
         botonLimpiar.addActionListener(e -> {
@@ -121,7 +120,7 @@ public class MainFrame extends JFrame {
         mapPanel.setSeleccion(inicio, destino);
     }
 
-    /** Refresca los combos de inicio/destino con los ids actuales del grafo. */
+   
     private void actualizarCombosDeNodos() {
         String inicioPrevio = (String) comboInicio.getSelectedItem();
         String destinoPrevio = (String) comboDestino.getSelectedItem();
@@ -144,37 +143,41 @@ public class MainFrame extends JFrame {
         actualizarSeleccionEnMapa();
     }
 
-    private void ejecutarBusqueda() {
-        String inicio = (String) comboInicio.getSelectedItem();
-        String destino = (String) comboDestino.getSelectedItem();
-        String algoritmo = (String) comboAlgoritmo.getSelectedItem();
-        boolean modoExploracion = "Exploracion".equals(comboModo.getSelectedItem());
+private void ejecutarBusqueda() {
+    String inicio = (String) comboInicio.getSelectedItem();
+    String destino = (String) comboDestino.getSelectedItem();
+    String algoritmo = (String) comboAlgoritmo.getSelectedItem();
+    boolean modoExploracion = "Exploracion".equals(comboModo.getSelectedItem());
 
-        if (inicio == null || destino == null) {
-            JOptionPane.showMessageDialog(this, "Debe existir al menos un punto de inicio y uno de destino.");
-            return;
-        }
-
-        detenerAnimacionSiActiva();
-        mapPanel.limpiarRecorrido();
-
-        PathResult<MapPoint> resultado = controller.ejecutarBusqueda(algoritmo, inicio, destino);
-        if (resultado == null) {
-            JOptionPane.showMessageDialog(this, "No se pudo ejecutar la busqueda.");
-            return;
-        }
-
-        if (modoExploracion) {
-            animarExploracion(resultado);
-        } else {
-            animarSoloRuta(resultado);
-        }
+    if (inicio == null || destino == null) {
+        JOptionPane.showMessageDialog(this, "Debe existir al menos un punto de inicio y uno de destino.");
+        return;
     }
 
-    /**
-     * Modo EXPLORATION: se revela paso a paso cada nodo visitado por el
-     * algoritmo y, al terminar, se resalta la ruta final encontrada.
-     */
+    detenerAnimacionSiActiva();
+    mapPanel.limpiarRecorrido();
+
+    
+    long tiempoInicioNs = System.nanoTime();
+    PathResult<MapPoint> resultado = controller.ejecutarBusqueda(algoritmo, inicio, destino);
+    long tiempoFinNs = System.nanoTime();
+    
+
+    if (resultado == null) {
+        JOptionPane.showMessageDialog(this, "No se pudo ejecutar la busqueda.");
+        return;
+    }
+
+    ultimoAlgoritmoEjecutado = algoritmo;
+    ultimoTiempoEjecucionMs = (tiempoFinNs - tiempoInicioNs) / 1_000_000.0; // ns -> ms
+
+    if (modoExploracion) {
+        animarExploracion(resultado);
+    } else {
+        animarSoloRuta(resultado);
+    }
+}
+
     private void animarExploracion(PathResult<MapPoint> resultado) {
         Iterator<MapPoint> visitados = resultado.getVisitados().iterator();
 
@@ -191,10 +194,7 @@ public class MainFrame extends JFrame {
         animacionActiva.start();
     }
 
-    /**
-     * Modo FINAL_PATH: no se dibuja la exploracion intermedia, unicamente
-     * la ruta final, de forma progresiva desde el inicio hasta el destino.
-     */
+ 
     private void animarSoloRuta(PathResult<MapPoint> resultado) {
         mostrarResultadoFinal(resultado);
         animarRuta(new ArrayList<>(resultado.getPath()));
@@ -212,14 +212,34 @@ public class MainFrame extends JFrame {
         });
         animacionActiva.start();
     }
+        private String formatearIds(Set<MapPoint> puntos) {
+        StringBuilder sb = new StringBuilder("[");
+        boolean primero = true;
+        for (MapPoint p : puntos) {
+            if (!primero) {
+                sb.append(", ");
+            }
+            sb.append(p.getId());
+            primero = false;
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 
     private void mostrarResultadoFinal(PathResult<MapPoint> resultado) {
+            String tiempoTexto = String.format("%.3f ms", ultimoTiempoEjecucionMs);
+            String visitadosTexto= formatearIds(resultado.getVisitados());
         if (resultado.encontroRuta()) {
-            etiquetaEstado.setText("Ruta encontrada: " + resultado.getVisitados().size()
-                    + " nodos visitados, " + resultado.getPath().size() + " nodos en la ruta.");
+            String rutaTexto = formatearIds(resultado.getPath());
+            etiquetaEstado.setText("Algoritmo: " + ultimoAlgoritmoEjecutado
+                    + " | Tiempo: " + tiempoTexto
+                    + " | Visitados (" + resultado.getVisitados().size() + "): " + visitadosTexto
+                    + " | Ruta (" + resultado.getPath().size() + "): " + rutaTexto);
         } else {
-            etiquetaEstado.setText("No existe una ruta entre los puntos seleccionados ("
-                    + resultado.getVisitados().size() + " nodos visitados).");
+            etiquetaEstado.setText("Algoritmo: " + ultimoAlgoritmoEjecutado
+                    + " | Tiempo: " + tiempoTexto
+                    + " | Visitados (" + resultado.getVisitados().size() + "): " + visitadosTexto
+                    + " | No existe ruta entre los puntos seleccionados.");
         }
     }
 

@@ -13,16 +13,7 @@ import structures.graphs.PathFinder;
 import structures.graphs.PathResult;
 import structures.node.Node;
 
-/**
- * Implementacion de Busqueda en Anchura (BFS) sobre Graph<T>.
- *
- * Utiliza una cola (Queue) para administrar los nodos pendientes de
- * exploracion, un Set para controlar los nodos ya visitados y un mapa
- * de predecesores para poder reconstruir la ruta una vez que se alcanza
- * el destino. Al explorar por niveles, la primera vez que se llega al
- * nodo destino se garantiza que la ruta reconstruida es la mas corta en
- * numero de aristas.
- */
+
 public class BFSPathFinder<T> implements PathFinder<T> {
 
     @Override
@@ -54,15 +45,10 @@ public class BFSPathFinder<T> implements PathFinder<T> {
             }
         }
 
-        // No se encontro el destino: no existe ruta entre start y end.
+        
         return new PathResult<>(ordenVisita, new LinkedHashSet<>());
     }
 
-    /**
-     * Reconstruye la ruta desde start hasta end recorriendo el mapa de
-     * predecesores en sentido inverso (desde end hacia start) y luego
-     * invirtiendo el resultado para que quede en orden A -> B.
-     */
     private Set<T> buildPath(Map<T, T> predecesores, T end) {
         LinkedList<T> pathInverso = new LinkedList<>();
         T actual = end;

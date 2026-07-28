@@ -22,24 +22,16 @@ import controllers.MapController;
 import models.MapPoint;
 import structures.node.Node;
 
-/**
- * Vista encargada unicamente de dibujar el mapa: la imagen de fondo, los
- * puntos (nodos), las calles (aristas), la exploracion de BFS/DFS y la
- * ruta final encontrada.
- *
- * Esta clase NO implementa BFS ni DFS ni conoce sus detalles: solo recibe
- * del controlador/MainFrame las colecciones de puntos que debe resaltar.
- * Tampoco decide que se guarda en el archivo de configuracion; unicamente
- * notifica al controlador cuando el usuario agrega/elimina un elemento.
- */
+
 public class MapPanel extends JPanel {
 
-    /** Modo de edicion activo sobre el mapa, definido desde MainFrame. */
+    
     public enum EditMode {
         NONE,
         ADD_NODE,
         ADD_EDGE,
-        REMOVE_NODE
+        REMOVE_NODE,
+        REMOVE_EDGE
     }
 
     private static final int NODE_RADIUS = 14;
@@ -51,23 +43,18 @@ public class MapPanel extends JPanel {
     private EditMode editMode = EditMode.NONE;
     private MapPointListener listener;
 
-    // Seleccion auxiliar utilizada para crear aristas (primer punto elegido).
     private MapPoint origenSeleccionado;
 
-    // Nodos de inicio (A) y destino (B) elegidos para ejecutar la busqueda.
     private String startId;
     private String endId;
 
-    // Resultados a resaltar durante/luego de una busqueda.
     private final List<MapPoint> visitadosParaDibujar = new ArrayList<>();
     private final List<MapPoint> rutaParaDibujar = new ArrayList<>();
 
-    // Transformacion actual imagen-original -> pantalla, recalculada en cada pintado.
     private double scale = 1.0;
     private int offsetX = 0;
     private int offsetY = 0;
 
-    /** Callback hacia MainFrame para refrescar combos cuando cambia el grafo. */
     public interface MapPointListener {
         void onGraphChanged();
     }
@@ -102,28 +89,22 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
-    /** Agrega progresivamente un punto visitado (usado por la animacion). */
     public void agregarVisitado(MapPoint punto) {
         visitadosParaDibujar.add(punto);
         repaint();
     }
 
-    /** Agrega progresivamente un punto de la ruta final (usado por la animacion). */
     public void agregarPuntoDeRuta(MapPoint punto) {
         rutaParaDibujar.add(punto);
         repaint();
     }
 
-    /** Limpia toda la exploracion y ruta dibujadas, sin modificar el grafo. */
     public void limpiarRecorrido() {
         visitadosParaDibujar.clear();
         rutaParaDibujar.clear();
         repaint();
     }
 
-    // ---------------------------------------------------------------
-    // Interaccion del usuario
-    // ---------------------------------------------------------------
 
     private void manejarClick(int screenX, int screenY) {
         double mapX = (screenX - offsetX) / scale;
@@ -141,6 +122,9 @@ public class MapPanel extends JPanel {
             case REMOVE_NODE:
                 manejarEliminarNodo(puntoClicado);
                 break;
+            case REMOVE_EDGE:
+                manejarEliminarArista(puntoClicado);
+                break;
             case NONE:
             default:
                 // En modo NONE el click no modifica el grafo.
@@ -150,12 +134,12 @@ public class MapPanel extends JPanel {
 
     private void manejarAgregarNodo(double mapX, double mapY, MapPoint puntoClicado) {
         if (puntoClicado != null) {
-            return; // Ya hay un nodo en esa posicion; no se crea uno nuevo encima.
+            return; 
         }
         String id = javax.swing.JOptionPane.showInputDialog(this,
                 "Identificador del nuevo punto:", "Agregar punto", javax.swing.JOptionPane.QUESTION_MESSAGE);
         if (id == null) {
-            return; // Cancelado por el usuario.
+            return; 
         }
         boolean agregado = controller.addNode(id.trim(), (int) mapX, (int) mapY);
         if (!agregado) {
@@ -204,6 +188,43 @@ public class MapPanel extends JPanel {
         notificarCambio();
     }
 
+    /**
+     * Igual que manejarAgregarArista: el primer click elige el origen y el
+     * segundo el destino. Al confirmar el segundo punto se pregunta si la
+     * calle debe eliminarse en ambos sentidos o solo en el sentido
+     * origen -> destino, reutilizando la misma logica de dialogo que se
+     * usa para crear calles.
+     */
+    private void manejarEliminarArista(MapPoint puntoClicado) {
+        if (puntoClicado == null) {
+            return;
+        }
+        if (origenSeleccionado == null) {
+            origenSeleccionado = puntoClicado;
+            repaint();
+            return;
+        }
+        if (origenSeleccionado.equals(puntoClicado)) {
+            origenSeleccionado = null;
+            repaint();
+            return;
+        }
+
+        int opcion = javax.swing.JOptionPane.showConfirmDialog(this,
+                "¿Eliminar la calle entre " + origenSeleccionado.getId() + " y " + puntoClicado.getId()
+                        + " en ambos sentidos?",
+                "Eliminar calle", javax.swing.JOptionPane.YES_NO_CANCEL_OPTION);
+
+        if (opcion == javax.swing.JOptionPane.YES_OPTION) {
+            controller.removeEdge(origenSeleccionado.getId(), puntoClicado.getId(), true);
+        } else if (opcion == javax.swing.JOptionPane.NO_OPTION) {
+            controller.removeEdge(origenSeleccionado.getId(), puntoClicado.getId(), false);
+        }
+
+        origenSeleccionado = null;
+        notificarCambio();
+    }
+
     private void notificarCambio() {
         limpiarRecorrido();
         if (listener != null) {
@@ -225,9 +246,7 @@ public class MapPanel extends JPanel {
         return null;
     }
 
-    // ---------------------------------------------------------------
-    // Dibujo
-    // ---------------------------------------------------------------
+    
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -243,7 +262,6 @@ public class MapPanel extends JPanel {
         dibujarNodos(g2);
     }
 
-    /** Calcula escala y desplazamiento para conservar la proporcion de la imagen. */
     private void actualizarTransformacion() {
         int imgW = backgroundImage.getWidth(this);
         int imgH = backgroundImage.getHeight(this);
