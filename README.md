@@ -250,8 +250,7 @@ También puede abrirse directamente en Visual Studio Code con la extensión
 
 ## Pruebas realizadas
 
-Se probaron los siguientes escenarios (ver detalle y evidencias en
-[COMPLETAR]):
+Se probaron los siguientes escenarios 
 
 1. Agregar nodo.
 2. Evitar identificadores repetidos.
