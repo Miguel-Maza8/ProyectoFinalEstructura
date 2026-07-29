@@ -120,7 +120,6 @@ public class MainFrame extends JFrame {
         mapPanel.setSeleccion(inicio, destino);
     }
 
-   
     private void actualizarCombosDeNodos() {
         String inicioPrevio = (String) comboInicio.getSelectedItem();
         String destinoPrevio = (String) comboDestino.getSelectedItem();
@@ -161,11 +160,10 @@ private void ejecutarBusqueda() {
     long tiempoInicioNs = System.nanoTime();
     PathResult<MapPoint> resultado = controller.ejecutarBusqueda(algoritmo, inicio, destino);
     long tiempoFinNs = System.nanoTime();
-    
-
+  
     if (resultado == null) {
         JOptionPane.showMessageDialog(this, "No se pudo ejecutar la busqueda.");
-        return;
+        return; 
     }
 
     ultimoAlgoritmoEjecutado = algoritmo;
@@ -187,18 +185,28 @@ private void ejecutarBusqueda() {
                 mapPanel.agregarVisitado(visitados.next());
             } else {
                 animacionActiva.stop();
-                mostrarResultadoFinal(resultado);
+                mostrarResultadoFinal(resultado,true);
                 animarRuta(new ArrayList<>(resultado.getPath()));
             }
         });
         animacionActiva.start();
     }
 
- 
-    private void animarSoloRuta(PathResult<MapPoint> resultado) {
-        mostrarResultadoFinal(resultado);
-        animarRuta(new ArrayList<>(resultado.getPath()));
+
+private void animarSoloRuta(PathResult<MapPoint> resultado) {
+
+    List<MapPoint> ruta = new ArrayList<>(resultado.getPath());
+
+    if (!ruta.isEmpty()) {
+        MapPoint inicio = ruta.get(0);
+        MapPoint destino = ruta.get(ruta.size() - 1);
+
+        mapPanel.setSeleccion(inicio.getId(), destino.getId());
     }
+
+    mostrarResultadoFinal(resultado,false);
+    animarRuta(ruta);
+}
 
     private void animarRuta(List<MapPoint> ruta) {
         Iterator<MapPoint> iterador = ruta.iterator();
@@ -225,23 +233,45 @@ private void ejecutarBusqueda() {
         sb.append("]");
         return sb.toString();
     }
+    private void mostrarResultadoFinal(PathResult<MapPoint> resultado, boolean modoExploracion) {
 
-    private void mostrarResultadoFinal(PathResult<MapPoint> resultado) {
-            String tiempoTexto = String.format("%.3f ms", ultimoTiempoEjecucionMs);
-            String visitadosTexto= formatearIds(resultado.getVisitados());
-        if (resultado.encontroRuta()) {
-            String rutaTexto = formatearIds(resultado.getPath());
-            etiquetaEstado.setText("Algoritmo: " + ultimoAlgoritmoEjecutado
+    String tiempoTexto = String.format("%.3f ms", ultimoTiempoEjecucionMs);
+
+    if (resultado.encontroRuta()) {
+
+        String rutaTexto = formatearIds(resultado.getPath());
+
+        if (modoExploracion) {
+
+            String visitadosTexto = formatearIds(resultado.getVisitados());
+
+            etiquetaEstado.setText(
+                    "Algoritmo: " + ultimoAlgoritmoEjecutado
                     + " | Tiempo: " + tiempoTexto
                     + " | Visitados (" + resultado.getVisitados().size() + "): " + visitadosTexto
-                    + " | Ruta (" + resultado.getPath().size() + "): " + rutaTexto);
+                    + " | Ruta (" + resultado.getPath().size() + "): " + rutaTexto
+            );
+
         } else {
-            etiquetaEstado.setText("Algoritmo: " + ultimoAlgoritmoEjecutado
+
+            etiquetaEstado.setText(
+                    "Algoritmo: " + ultimoAlgoritmoEjecutado
                     + " | Tiempo: " + tiempoTexto
-                    + " | Visitados (" + resultado.getVisitados().size() + "): " + visitadosTexto
-                    + " | No existe ruta entre los puntos seleccionados.");
+                    + " | Ruta (" + resultado.getPath().size() + "): " + rutaTexto
+            );
         }
+
+    } else {
+
+        etiquetaEstado.setText(
+                "Algoritmo: " + ultimoAlgoritmoEjecutado
+                + " | Tiempo: " + tiempoTexto
+                + " | No existe ruta entre los puntos seleccionados."
+        );
     }
+}
+
+
 
     private void detenerAnimacionSiActiva() {
         if (animacionActiva != null && animacionActiva.isRunning()) {

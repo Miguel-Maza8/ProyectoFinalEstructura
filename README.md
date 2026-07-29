@@ -1,22 +1,19 @@
 # Implementación y visualización de rutas en un mapa de calles mediante BFS y DFS
 
-> ⚠️ **Nota:** este README es la base del informe técnico solicitado. Completa los
-> campos marcados como `[COMPLETAR]` con la información real del grupo antes de la
-> entrega (carátula, integrantes, capturas de pantalla, tabla de resultados y
-> conclusiones individuales).
 
 ## Carátula
 
-- **Universidad:** [COMPLETAR - nombre de la universidad / logo institucional]
+- **Universidad:**  Politecnica Salesiana 
 - **Carrera:** Computación
 - **Asignatura:** Estructura de Datos
 - **Proyecto:** Proyecto Final - Implementación y visualización de rutas en un mapa
   de calles mediante BFS y DFS
 - **Docente:** Ing. Pablo Torres
 - **Integrantes:**
-  - [COMPLETAR - Nombre integrante 1] — [COMPLETAR - correo institucional]
-  - [COMPLETAR - Nombre integrante 2] — [COMPLETAR - correo institucional]
-  - [COMPLETAR - Nombre integrante 3] — [COMPLETAR - correo institucional]
+  - [David Fajardo] 
+  - [Martin Villacres]
+  - [Kevin Sacaquirin] 
+  - [Miguel Maza] 
 
 ## Índice
 

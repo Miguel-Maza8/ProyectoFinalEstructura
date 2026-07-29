@@ -16,23 +16,7 @@ import models.MapPoint;
 import structures.graphs.Graph;
 import structures.node.Node;
 
-/**
- * Implementacion de GraphRepository que persiste el grafo en un archivo
- * de texto plano con formato CSV.
- *
- * Formato utilizado (una fila por registro, separada por comas):
- *   NODE,id,x,y
- *   EDGE,idOrigen,idDestino,bidireccional(true|false)
- *
- * Ejemplo:
- *   NODE,A,120,85
- *   NODE,B,300,140
- *   EDGE,A,B,true
- *
- * El archivo se lee por completo al iniciar la aplicacion y se
- * sobrescribe cada vez que se agrega o elimina un nodo/conexion, de
- * modo que siempre refleja el estado actual del grafo en memoria.
- */
+
 public class FileGraphRepository implements GraphRepository {
 
     private final String filePath;
@@ -47,7 +31,7 @@ public class FileGraphRepository implements GraphRepository {
         Path path = Path.of(filePath);
 
         if (!Files.exists(path)) {
-            // No hay configuracion previa: se devuelve un grafo vacio.
+            
             return graph;
         }
 

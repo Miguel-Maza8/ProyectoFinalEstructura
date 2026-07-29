@@ -13,7 +13,6 @@ import structures.graphs.PathFinder;
 import structures.graphs.PathResult;
 import structures.node.Node;
 
-
 public class BFSPathFinder<T> implements PathFinder<T> {
 
     @Override
@@ -45,9 +44,9 @@ public class BFSPathFinder<T> implements PathFinder<T> {
             }
         }
 
-        
         return new PathResult<>(ordenVisita, new LinkedHashSet<>());
     }
+
 
     private Set<T> buildPath(Map<T, T> predecesores, T end) {
         LinkedList<T> pathInverso = new LinkedList<>();

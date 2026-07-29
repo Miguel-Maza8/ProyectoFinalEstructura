@@ -48,13 +48,13 @@ public class MapPanel extends JPanel {
     private String startId;
     private String endId;
 
+   
     private final List<MapPoint> visitadosParaDibujar = new ArrayList<>();
     private final List<MapPoint> rutaParaDibujar = new ArrayList<>();
 
     private double scale = 1.0;
     private int offsetX = 0;
     private int offsetY = 0;
-
     public interface MapPointListener {
         void onGraphChanged();
     }
@@ -89,6 +89,7 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
+    
     public void agregarVisitado(MapPoint punto) {
         visitadosParaDibujar.add(punto);
         repaint();
@@ -105,6 +106,7 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
+   
 
     private void manejarClick(int screenX, int screenY) {
         double mapX = (screenX - offsetX) / scale;
@@ -127,7 +129,7 @@ public class MapPanel extends JPanel {
                 break;
             case NONE:
             default:
-                // En modo NONE el click no modifica el grafo.
+               
                 break;
         }
     }
@@ -188,13 +190,7 @@ public class MapPanel extends JPanel {
         notificarCambio();
     }
 
-    /**
-     * Igual que manejarAgregarArista: el primer click elige el origen y el
-     * segundo el destino. Al confirmar el segundo punto se pregunta si la
-     * calle debe eliminarse en ambos sentidos o solo en el sentido
-     * origen -> destino, reutilizando la misma logica de dialogo que se
-     * usa para crear calles.
-     */
+    
     private void manejarEliminarArista(MapPoint puntoClicado) {
         if (puntoClicado == null) {
             return;
@@ -246,7 +242,6 @@ public class MapPanel extends JPanel {
         return null;
     }
 
-    
 
     @Override
     protected void paintComponent(Graphics g) {

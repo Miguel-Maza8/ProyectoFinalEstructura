@@ -14,6 +14,7 @@ import structures.graphs.PathFinder;
 import structures.graphs.PathResult;
 import structures.node.Node;
 
+
 public class AStarPathFinder<T> implements PathFinder<T> {
 
     private final Heuristic<T> heuristica;
