@@ -136,12 +136,12 @@ public class MapPanel extends JPanel {
 
     private void manejarAgregarNodo(double mapX, double mapY, MapPoint puntoClicado) {
         if (puntoClicado != null) {
-            return; // Ya hay un nodo en esa posicion; no se crea uno nuevo encima.
+            return; 
         }
         String id = javax.swing.JOptionPane.showInputDialog(this,
                 "Identificador del nuevo punto:", "Agregar punto", javax.swing.JOptionPane.QUESTION_MESSAGE);
         if (id == null) {
-            return; // Cancelado por el usuario.
+            return; 
         }
         boolean agregado = controller.addNode(id.trim(), (int) mapX, (int) mapY);
         if (!agregado) {
@@ -190,13 +190,7 @@ public class MapPanel extends JPanel {
         notificarCambio();
     }
 
-    /**
-     * Igual que manejarAgregarArista: el primer click elige el origen y el
-     * segundo el destino. Al confirmar el segundo punto se pregunta si la
-     * calle debe eliminarse en ambos sentidos o solo en el sentido
-     * origen -> destino, reutilizando la misma logica de dialogo que se
-     * usa para crear calles.
-     */
+    
     private void manejarEliminarArista(MapPoint puntoClicado) {
         if (puntoClicado == null) {
             return;
@@ -408,3 +402,4 @@ public class MapPanel extends JPanel {
         return Color.WHITE;
     }
 }
+

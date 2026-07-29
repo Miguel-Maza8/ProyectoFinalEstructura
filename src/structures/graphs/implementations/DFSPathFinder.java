@@ -2,7 +2,6 @@ package structures.graphs.implementations;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import structures.graphs.Graph;
 import structures.graphs.PathFinder;
 import structures.graphs.PathResult;

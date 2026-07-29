@@ -19,7 +19,6 @@ public class MapController {
 
     private final Graph<MapPoint> graph;
     private final GraphRepository repository;
-
     private final PathFinder<MapPoint> bfsPathFinder = new BFSPathFinder<>();
     private final PathFinder<MapPoint> dfsPathFinder = new DFSPathFinder<>();
 

@@ -2,16 +2,7 @@ package structures.node;
 
 import java.util.Objects;
 
-/**
- * Nodo generico utilizado internamente por Graph<T> para representar
- * un vertice del grafo. El nodo unicamente envuelve el valor almacenado;
- * la identidad logica del nodo depende exclusivamente de ese valor.
- *
- * Se utilizan equals()/hashCode() basados en el valor porque Graph crea
- * nuevas instancias de Node<T> para consultar las claves del HashMap
- * (por ejemplo al buscar vecinos o al eliminar aristas), tal como se
- * trabajo en clase con la clase Nodes<T>.
- */
+
 public class Node<T> {
 
     private T value;
