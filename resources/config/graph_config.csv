@@ -1,0 +1,11 @@
+# Configuracion del grafo del mapa (nodos y conexiones)
+NODE,A,300,200
+NODE,B,700,180
+NODE,C,450,450
+NODE,D,950,420
+NODE,E,1300,300
+EDGE,A,B,true
+EDGE,A,C,true
+EDGE,B,D,true
+EDGE,C,D,true
+EDGE,D,E,false
