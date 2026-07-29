@@ -1,7 +1,6 @@
 # Implementación y visualización de rutas en un mapa de calles mediante BFS y DFS
 
 
-## Carátula
 
 - **Universidad:**  Politecnica Salesiana 
 - **Carrera:** Computación
@@ -10,47 +9,23 @@
   de calles mediante BFS y DFS
 - **Docente:** Ing. Pablo Torres
 - **Integrantes:**
-  - [David Fajardo] 
-  - [Martin Villacres]
-  - [Kevin Sacaquirin] 
-  - [Miguel Maza] 
+  - David Fajardo
+  - Martin Villacres
+  - Kevin Sacaquirin
+  - Miguel Maza
 
-## Índice
-
-1. [Objetivo](#objetivo)
-2. [Descripción del problema](#descripción-del-problema)
-3. [Marco teórico](#marco-teórico)
-4. [Tecnologías utilizadas](#tecnologías-utilizadas)
-5. [Arquitectura y estructura de carpetas](#arquitectura-y-estructura-de-carpetas)
-6. [Diagrama UML](#diagrama-uml)
-7. [Funcionamiento general](#funcionamiento-general)
-8. [Capturas de pantalla](#capturas-de-pantalla)
-9. [Ejemplo comentado: BFS](#ejemplo-comentado-bfs)
-10. [Tabla comparativa de resultados](#tabla-comparativa-de-resultados)
-11. [Cómo ejecutar el proyecto](#cómo-ejecutar-el-proyecto)
-12. [Pruebas realizadas](#pruebas-realizadas)
-13. [Conclusiones](#conclusiones)
-14. [Recomendaciones y aplicaciones futuras](#recomendaciones-y-aplicaciones-futuras)
 
 ## Objetivo
 
-Desarrollar una aplicación en Java que modele un mapa de calles como un grafo,
-permita ubicar intersecciones (nodos) y calles (aristas) sobre una imagen de
-fondo, e implemente los algoritmos BFS y DFS para encontrar una ruta entre un
-punto de inicio (A) y un punto de destino (B), visualizando tanto el proceso de
-exploración como la ruta final.
+El objetivo es realizar una aplicación en Java que represente un mapa de calles como un grafo, donde las intersecciones sean nodos y las calles aristas sobre una imagen de fondo.
+Implementar los algoritmos BFS , DFS  , Greedy y A* para encontrar rutas entre un punto de inicio (A) y un destino (B).
+Mostrar visualmente el recorrido de búsqueda y la ruta final encontrada.
 
 ## Descripción del problema
 
-Un mapa de calles puede modelarse como un grafo donde cada intersección es un
-vértice y cada calle es una arista (bidireccional si se puede circular en ambos
-sentidos, o dirigida si es de un solo sentido). Encontrar una ruta entre dos
-intersecciones equivale a encontrar un camino entre dos vértices del grafo. El
-proyecto resuelve este problema aplicando dos estrategias clásicas de recorrido:
-BFS (que garantiza la ruta con menor número de calles) y DFS (que explora en
-profundidad y no garantiza el camino más corto, pero suele ser más económico en
-memoria).
-
+Un mapa de calles puede representarse como un grafo, donde las intersecciones son vértices y las calles son aristas.
+Para encontrar una ruta entre dos puntos se utilizan los algoritmo, que encuentra el camino con menos calles y que explora primero los caminos más profundos.
+La aplicación permite visualizar el recorrido de búsqueda y la ruta encontrada de forma gráfica.
 ## Marco teórico
 
 **Grafos.** Un grafo `G = (V, E)` está compuesto por un conjunto de vértices `V`
@@ -87,34 +62,34 @@ valor genérico.
 
 ```
 src/
-├── App.java                          # Punto de entrada
+├── App.java                          
 ├── controllers/
-│   └── MapController.java            # Orquesta modelo, algoritmos y persistencia
+│   └── MapController.java            
 ├── models/
-│   ├── MapPoint.java                 # Punto del mapa (id, x, y)
-│   └── VisualizationMode.java        # EXPLORATION / FINAL_PATH
+│   ├── MapPoint.java                 
+│   └── VisualizationMode.java       
 ├── persistence/
-│   ├── GraphRepository.java          # Contrato de persistencia
-│   └── FileGraphRepository.java      # Persistencia en archivo CSV
+│   ├── GraphRepository.java          
+│   └── FileGraphRepository.java      
 ├── structures/
 │   ├── node/
-│   │   └── Node.java                 # Nodo genérico (equals/hashCode por valor)
+│   │   └── Node.java                 
 │   └── graphs/
-│       ├── Graph.java                # Grafo genérico (lista de adyacencia)
-│       ├── PathFinder.java           # Contrato de búsqueda de rutas
-│       ├── PathResult.java           # Resultado: visitados + ruta
+│       ├── Graph.java                
+│       ├── PathFinder.java          
+│       ├── PathResult.java          
 │       └── implementations/
 │           ├── BFSPathFinder.java
 │           └── DFSPathFinder.java
 └── views/
-    ├── MainFrame.java                # Ventana principal y controles
-    └── MapPanel.java                 # Dibuja el mapa, nodos, aristas y recorridos
+    ├── MainFrame.java              
+    └── MapPanel.java                 
 
 resources/
 ├── maps/
-│   └── map.png                       # Imagen de fondo del mapa
+│   └── map.png                       
 └── config/
-    └── graph_config.csv              # Se genera/actualiza automáticamente
+    └── graph_config.csv             
 ```
 
 **Responsabilidades por capa:**
@@ -150,9 +125,6 @@ BFSPathFinder<T>  DFSPathFinder<T>
  MainFrame *-- MapPanel
 ```
 
-[COMPLETAR: reemplazar este diagrama textual por una imagen UML generada con
-una herramienta como draw.io, PlantUML o similar, y explicar brevemente las
-relaciones entre clases.]
 
 ## Funcionamiento general
 
@@ -177,17 +149,19 @@ relaciones entre clases.]
 
 ## Capturas de pantalla
 
-[COMPLETAR: incluir aquí al menos dos capturas con configuraciones de mapa
-diferentes, mostrando nodos, aristas, y los dos modos de visualización.]
+![alt text](image.png)
+
+![alt text](image-1.png)
+
 
 ## Ejemplo comentado: BFS
 
 ```java
 public PathResult<T> find(Graph<T> graph, T start, T end) {
-    Queue<T> queue = new LinkedList<>();      // nodos pendientes de explorar
-    Set<T> visitados = new HashSet<>();       // evita procesar un nodo dos veces
-    Set<T> ordenVisita = new LinkedHashSet<>(); // conserva el orden de exploración
-    Map<T, T> predecesores = new HashMap<>();  // permite reconstruir la ruta
+    Queue<T> queue = new LinkedList<>();      
+    Set<T> visitados = new HashSet<>();       
+    Set<T> ordenVisita = new LinkedHashSet<>(); 
+    Map<T, T> predecesores = new HashMap<>();  
 
     queue.add(start);
     visitados.add(start);
@@ -209,7 +183,7 @@ public PathResult<T> find(Graph<T> graph, T start, T end) {
             }
         }
     }
-    return new PathResult<>(ordenVisita, new LinkedHashSet<>()); // no existe ruta
+    return new PathResult<>(ordenVisita, new LinkedHashSet<>()); 
 }
 ```
 
@@ -220,26 +194,42 @@ descubrió; al llegar al destino, `buildPath` recorre ese mapa hacia atrás para
 reconstruir la ruta completa desde el inicio.
 
 ## Tabla comparativa de resultados
+| Caso | Algoritmo | Inicio | Destino | Nodos visitados | Ruta encontrada | Tiempo |
+|------|-----------|--------|---------|------------------|------------------|--------|
+| 1 | DFS | F | X | G, H, I, J, K, O, A12, L, A7, P, S, Y, X (13) | F, G, H, I, J, K, O, A12, L, A7, P, S, Y, X (14 nodos / 13 aristas) | 0,150 ms |
+| 1 | BFS | F | X | F, G, A4, H, N, A10, I, A9, A7, A6, J, L, P, D, K, A12, S, B, O, W, Y, A2, A3, X (24) | F, A4, A10, A7, P, S, Y, X (8 nodos / 7 aristas) | 0,196 ms |
+| 1 | Greedy | F | X | F, A4, A10, A7, P, V, Y, X (8) | F, A4, A10, A7, P, V, Y, X (8 nodos / 7 aristas) | 2,100 ms |
+| 1 | A* | F | X | F, A4, A10, A7, P, V, Y, X (8) | F, A4, A10, A7, P, V, Y, X (8 nodos / 7 aristas) | 1,465 ms |
 
-[COMPLETAR con datos de ejecuciones reales, sin inventar valores.]
+- **¿Qué tan distinto fue el orden de exploración entre BFS y DFS?** 
+DFS visitó solo 13 nodos porque siguió casi una única rama del grafo y necesitó pocos retrocesos. En cambio, BFS exploró muchos más nodos al recorrer el grafo por niveles, revisando vecinos que no formaban parte de la ruta final, aunque con la ventaja de garantizar el camino más corto.
 
-| Caso | Algoritmo | Inicio | Destino | Nodos visitados | Aristas en la ruta | Tiempo |
-|------|-----------|--------|---------|------------------|---------------------|--------|
-| 1    | BFS       |        |         |                  |                     |        |
-| 1    | DFS       |        |         |                  |                     |        |
-| 2    | BFS       |        |         |                  |                     |        |
-| 2    | DFS       |        |         |                  |                     |        |
-| 3    | BFS       |        |         |                  |                     |        |
-| 3    | DFS       |        |         |                  |                     |        |
 
-**Análisis requerido** [COMPLETAR en base a los resultados reales]:
-- ¿Qué diferencias se observaron en el orden de exploración de BFS y DFS?
-- ¿BFS encontró siempre la ruta con menor cantidad de aristas?
-- ¿DFS encontró rutas diferentes a las obtenidas con BFS?
-- ¿Qué algoritmo visitó más nodos en cada caso?
-- ¿Cómo influyó la estructura del grafo en el comportamiento de cada algoritmo?
-- ¿Qué ventajas aporta separar la lógica del algoritmo de la visualización?
-- ¿Qué mejoras podrían implementarse para trabajar con calles ponderadas?
+**Análisis:**
+
+- **¿Qué tan distinto fue el orden de exploración entre BFS y DFS?** 
+Bastante distinto el DFS visitó 13 nodos porque En este caso, DFS encontró la ruta recorriendo casi una sola rama (F -G - H - I - J - K - O - A12 - L - A7-.. ), por lo que exploró menos nodos y necesitó pocos retrocesos.
+En cambio, BFS visitó muchos más nodos porque explora el grafo por niveles, revisando primero todos los vecinos antes de avanzar.
+Por eso terminó recorriendo nodos que no formaban parte de la ruta final, aunque garantiza encontrar el camino con el menor número de calles.
+
+- **¿BFS encontró siempre la ruta con menos aristas?**
+ En este caso sí, y por bastante margen: BFS encontró una BFS encontró una ruta más corta de 7 aristas, mientras que DFS obtuvo una de 13 aristas porque sigue el primer camino disponible y no busca el más corto. Sin embargo, con un solo caso de prueba no se puede concluir que esto siempre ocurra.
+
+- **¿DFS llegó a encontrar rutas distintas a las de BFS?** 
+Sí, totalmente distinta. La ruta de DFS pasa por nodos que la de BFS ni toca (G, H, I, J, K, O, A12, L), lo que tiene sentido porque DFS simplemente sigue la primera rama disponible en vez de buscar el camino más corto.
+
+- **¿Cuál algoritmo visitó más nodos?** 
+BFS visito 24 nodos. Le siguen DFS con 13, y Greedy y A* quedaron muy por debajo, con 8 nodos cada uno — en este caso visitaron exactamente los mismos nodos que terminaron en la ruta final, sin nodos de más, porque al usar una heurística van directo hacia el destino en vez de explorar a ciegas.
+
+- **¿Cómo influyó la estructura del grafo?** 
+Los nodos intermedios hicieron que BFS explorara muchos desvíos antes de llegar al destino. DFS revisó menos nodos porque la primera rama que siguió sí conducía al objetivo, aunque no era la más corta. En cambio, Greedy y A* encontraron la ruta de forma más directa gracias a su heurística.
+
+- **¿Qué ventaja da separar la lógica del algoritmo de la visualización?** 
+La interfaz PathFinder<T> permitió agregar Greedy y A* sin modificar MapPanel ni MainFrame, simplemente creando nuevas clases. Además, facilitó medir el tiempo de ejecución de cada algoritmo sin que la animación influyera en los resultados.
+
+- **¿Qué habría que cambiar para trabajar con calles ponderadas?** 
+
+EN el Graph<T> solo almacena las conexiones entre nodos y no el peso de las aristas. Al agregar pesos como distancia o tiempo de viaje, sería posible mejorar Greedy y A* con una heurística más precisa e incorporar Dijkstra para comparar su rendimiento con los demás algoritmos.
 
 ## Cómo ejecutar el proyecto
 
@@ -285,9 +275,17 @@ Se probaron los siguientes escenarios (ver detalle y evidencias en
 
 ## Conclusiones
 
-- Conclusión de [COMPLETAR integrante 1]: ____________________________________
-- Conclusión de [COMPLETAR integrante 2]: ____________________________________
-- Conclusión de [COMPLETAR integrante 3]: ____________________________________
+David Fajardo: 
+El controlador cumple un rol intermediario entre la lógica de negocio y la vista. La interfaz tiene activado los listener necesarios para cumplir con las distintas opciones, por ejemplo, agregar, eliminar, conectar y buscar caminos entre los distintos nodos, el controlador, con esta información el controlador delega, por ejemplo, la búsqueda al PathFinder correspondiente y guarda el estado después de cada operación mediante una persistencia. El método SeleccionarFinder desacopla la interfaz gráfica del algoritmo elegido, lo cual facilita en primeras instancias, agregar nuevas búsquedas o algoritmos sin modificar gran parte del código.
+
+Kevin Sacaquirín: 
+Lo mas relevante de las clases de dominio e interfaces, es su estructura genérica, permitiendo que almacenen distintos valores sin necesidad de condiciona a usar un solo tipo de dato. Las interfaces PathFinder y GraphRepository funcionan como contratos que separan el que se realiza, del como se realiza. Esto abre las puertas a distintas implementaciones de busqueda y persistencia, considero que esta abstraccion es la base que sostiene una fleibilidad extendible en el proyecto.
+
+Miguel Maza:
+Al momento de revisar la interfaz gráfica y tener comprendido la separación de vista de la lógica de MapPanel y MainFrame que son los que se encargan de como el usuario dibuja los puntos, calles y de las animaciones sin mezclar acciones con modificaciones al código. Esto se puede observar de mejor manera en el modo de visualización que cambia solamente lo de las animaciones sin alterar el resultado. Fue un ejercicio de comprender como Swing puede mantenerse limpio cuando no ocupa funcionalidades que no le corresponden.
+
+Martín Villacrés:
+Pude comprender que la función de las implementaciones del BFS, DFS, GreddyBestFirst y A-star sobre la interfaz PathFinder permite aclarar la exploración por niveles y la exploración guiada por la clase heurística. BFS se encarga se verificar la ruta con menos aristas gracias a la cola utilizada, DFS con su recursividad y el BackTracking implementado no asegura tener la ruta más optima pero garantiza menor ocupación de memoria,Greddy y A-star incorporan la heurística para orientar el recorrido y permitir que independientemente recorran y busquen la ruta optima.
 
 ## Recomendaciones y aplicaciones futuras
 
