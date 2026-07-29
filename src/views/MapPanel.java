@@ -48,13 +48,13 @@ public class MapPanel extends JPanel {
     private String startId;
     private String endId;
 
+   
     private final List<MapPoint> visitadosParaDibujar = new ArrayList<>();
     private final List<MapPoint> rutaParaDibujar = new ArrayList<>();
 
     private double scale = 1.0;
     private int offsetX = 0;
     private int offsetY = 0;
-
     public interface MapPointListener {
         void onGraphChanged();
     }
@@ -89,6 +89,7 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
+    
     public void agregarVisitado(MapPoint punto) {
         visitadosParaDibujar.add(punto);
         repaint();
@@ -105,6 +106,7 @@ public class MapPanel extends JPanel {
         repaint();
     }
 
+   
 
     private void manejarClick(int screenX, int screenY) {
         double mapX = (screenX - offsetX) / scale;
@@ -127,19 +129,19 @@ public class MapPanel extends JPanel {
                 break;
             case NONE:
             default:
-                // En modo NONE el click no modifica el grafo.
+               
                 break;
         }
     }
 
     private void manejarAgregarNodo(double mapX, double mapY, MapPoint puntoClicado) {
         if (puntoClicado != null) {
-            return; 
+            return; // Ya hay un nodo en esa posicion; no se crea uno nuevo encima.
         }
         String id = javax.swing.JOptionPane.showInputDialog(this,
                 "Identificador del nuevo punto:", "Agregar punto", javax.swing.JOptionPane.QUESTION_MESSAGE);
         if (id == null) {
-            return; 
+            return; // Cancelado por el usuario.
         }
         boolean agregado = controller.addNode(id.trim(), (int) mapX, (int) mapY);
         if (!agregado) {
@@ -246,7 +248,6 @@ public class MapPanel extends JPanel {
         return null;
     }
 
-    
 
     @Override
     protected void paintComponent(Graphics g) {

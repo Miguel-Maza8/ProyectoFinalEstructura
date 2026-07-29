@@ -6,24 +6,15 @@ import java.util.List;
 import models.MapPoint;
 import persistence.GraphRepository;
 import structures.graphs.Graph;
+import structures.graphs.Heuristic;
 import structures.graphs.PathFinder;
 import structures.graphs.PathResult;
+import structures.graphs.implementations.AStarPathFinder;
 import structures.graphs.implementations.BFSPathFinder;
 import structures.graphs.implementations.DFSPathFinder;
+import structures.graphs.implementations.GreedyBestFirstPathFinder;
 import structures.node.Node;
 
-/**
- * Controlador de la aplicacion (patron MVC).
- *
- * Es el unico responsable de:
- *  - Recibir la interaccion del usuario proveniente de la vista.
- *  - Modificar el modelo (Graph<MapPoint>) al agregar/eliminar nodos y aristas.
- *  - Ejecutar los algoritmos de busqueda (BFS/DFS) a traves de PathFinder.
- *  - Persistir los cambios mediante GraphRepository.
- *
- * La vista (MainFrame/MapPanel) solo dibuja lo que el controlador le indica;
- * no conoce la implementacion de BFS/DFS ni el formato de persistencia.
- */
 public class MapController {
 
     private final Graph<MapPoint> graph;
@@ -31,6 +22,16 @@ public class MapController {
 
     private final PathFinder<MapPoint> bfsPathFinder = new BFSPathFinder<>();
     private final PathFinder<MapPoint> dfsPathFinder = new DFSPathFinder<>();
+
+ 
+    private final Heuristic<MapPoint> heuristicaEuclidiana = (actual, destino) -> {
+        double dx = actual.getX() - destino.getX();
+        double dy = actual.getY() - destino.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    private final PathFinder<MapPoint> greedyPathFinder = new GreedyBestFirstPathFinder<>(heuristicaEuclidiana);
+    private final PathFinder<MapPoint> aStarPathFinder = new AStarPathFinder<>(heuristicaEuclidiana);
 
     public MapController(GraphRepository repository) {
         this.repository = repository;
@@ -41,10 +42,7 @@ public class MapController {
         return graph;
     }
 
-    /**
-     * Busca un punto existente por su identificador.
-     * @return el MapPoint correspondiente, o null si no existe.
-     */
+  
     public MapPoint findPoint(String id) {
         for (Node<MapPoint> node : graph.getNodes()) {
             if (node.getValue().getId().equals(id)) {
@@ -54,10 +52,7 @@ public class MapController {
         return null;
     }
 
-    /**
-     * Devuelve los identificadores de todos los nodos registrados,
-     * en el mismo orden en que fueron agregados al grafo.
-     */
+  
     public List<String> getNodeIds() {
         List<String> ids = new ArrayList<>();
         for (Node<MapPoint> node : graph.getNodes()) {
@@ -66,12 +61,7 @@ public class MapController {
         return ids;
     }
 
-    /**
-     * Agrega un nuevo punto (interseccion) al grafo en la posicion indicada.
-     *
-     * @return true si se agrego correctamente, false si el id ya existia,
-     *         estaba vacio, o las coordenadas eran invalidas.
-     */
+    
     public boolean addNode(String id, int x, int y) {
         if (id == null || id.trim().isEmpty()) {
             return false;
@@ -85,9 +75,7 @@ public class MapController {
         return true;
     }
 
-    /**
-     * Elimina un nodo del grafo junto con todas sus conexiones.
-     */
+
     public boolean removeNode(String id) {
         MapPoint punto = findPoint(id);
         if (punto == null) {
@@ -98,14 +86,7 @@ public class MapController {
         return true;
     }
 
-    /**
-     * Crea una calle entre dos puntos existentes.
-     *
-     * @param bidireccional true para calle en ambos sentidos, false para
-     *                      calle de un solo sentido (origen -> destino).
-     * @return true si se creo la conexion, false si alguno de los puntos
-     *         no existe o si origen y destino son el mismo punto.
-     */
+ 
     public boolean addEdge(String idOrigen, String idDestino, boolean bidireccional) {
         MapPoint origen = findPoint(idOrigen);
         MapPoint destino = findPoint(idDestino);
@@ -123,10 +104,8 @@ public class MapController {
         return true;
     }
 
-    /**
-     * Elimina la conexion (en ambos sentidos) entre dos puntos.
-     */
-    public boolean removeEdge(String idOrigen, String idDestino) {
+
+    public boolean removeEdge(String idOrigen, String idDestino, boolean bidireccional) {
         MapPoint origen = findPoint(idOrigen);
         MapPoint destino = findPoint(idDestino);
 
@@ -134,19 +113,15 @@ public class MapController {
             return false;
         }
 
-        graph.removeEdge(origen, destino);
+        if (bidireccional) {
+            graph.removeEdge(origen, destino);
+        } else {
+            graph.removeEdgeUni(origen, destino);
+        }
         persist();
         return true;
     }
 
-    /**
-     * Ejecuta el algoritmo indicado (BFS o DFS) entre startId y endId.
-     * La logica de busqueda es identica sin importar el modo de
-     * visualizacion elegido en la vista: eso solo afecta como se dibuja
-     * el resultado, no como se calcula.
-     *
-     * @param algoritmo "BFS" o "DFS".
-     */
     public PathResult<MapPoint> ejecutarBusqueda(String algoritmo, String startId, String endId) {
         MapPoint start = findPoint(startId);
         MapPoint end = findPoint(endId);
@@ -155,8 +130,23 @@ public class MapController {
             return null;
         }
 
-        PathFinder<MapPoint> finder = "DFS".equalsIgnoreCase(algoritmo) ? dfsPathFinder : bfsPathFinder;
+        PathFinder<MapPoint> finder = seleccionarFinder(algoritmo);
         return finder.find(graph, start, end);
+    }
+
+    private PathFinder<MapPoint> seleccionarFinder(String algoritmo) {
+        String clave = algoritmo == null ? "" : algoritmo.toUpperCase();
+
+        if (clave.contains("DFS")) {
+            return dfsPathFinder;
+        }
+        if (clave.contains("GREEDY") || clave.contains("VORAZ")) {
+            return greedyPathFinder;
+        }
+        if (clave.contains("ASTAR") || clave.contains("A*")) {
+            return aStarPathFinder;
+        }
+        return bfsPathFinder;
     }
 
     private void persist() {

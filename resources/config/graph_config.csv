@@ -1,6 +1,4 @@
-# Configuracion de ejemplo del grafo del mapa (nodos y conexiones)
-# Este archivo se actualiza automaticamente al agregar/eliminar puntos y calles
-# desde la interfaz grafica.
+# Configuracion del grafo del mapa (nodos y conexiones)
 NODE,A,300,200
 NODE,B,700,180
 NODE,C,450,450
